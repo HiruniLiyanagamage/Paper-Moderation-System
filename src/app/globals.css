@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "@heroui/react/styles";
 
 :root {
   --background: #ffffff;
@@ -23,4 +24,30 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+:root {
+  --foreground: #111827;
+  --background: #ffffff;
+}
+
+.dark {
+  --foreground: #f9fafb;
+  --background: #0a0a0a;
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+}
+
+@layer base {
+  body {
+    @apply bg-white text-gray-900;
+  }
+
+  .dark body {
+    @apply bg-zinc-900 text-zinc-100;
+  }
+
 }

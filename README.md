@@ -20,6 +20,31 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
+## Supabase + Prisma Setup
+
+1. Copy `.env.local.example` to `.env.local`.
+2. Set the following environment variables:
+   - `NEXT_PUBLIC_SUPABASE_URL`
+   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+   - `DATABASE_URL`
+3. Use `src/lib/supabaseClient.ts` for client-side Supabase access.
+4. Use `src/lib/prisma.ts` for server-side Prisma database access.
+
+For example:
+
+```bash
+cp .env.local.example .env.local
+```
+
+Then replace `[YOUR-PASSWORD]` in `.env.local` with your Supabase DB password and run:
+
+```bash
+npm run prisma:generate
+npm run prisma:migrate -- --name init
+npm run prisma:seed
+npm run prisma:studio
+```
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:

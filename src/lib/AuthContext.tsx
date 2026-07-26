@@ -1,0 +1,163 @@
+'use client';
+
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+  isDepartmentHead: boolean;
+  isLecturer: boolean;
+  isModerator: boolean;
+  department: string;
+  contact?: string;
+}
+
+interface AuthContextType {
+  user: User | null;
+  login: (email: string, password: string) => Promise<boolean>;
+  logout: () => void;
+  currentRole: 'department_head' | 'lecturer' | 'moderator';
+  setCurrentRole: (role: 'department_head' | 'lecturer' | 'moderator') => void;
+  updateProfile: (updates: { name?: string; contact?: string }) => Promise<void>;
+  changePassword: (currentPassword: string, newPassword: string) => Promise<boolean>;
+}
+
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+export function AuthProvider({ children }: { children: ReactNode }) {
+  const [user, setUser] = useState<User | null>(null);
+  const [currentRole, setCurrentRole] = useState<'department_head' | 'lecturer' | 'moderator'>('lecturer');
+  const [loading, setLoading] = useState(true);
+
+  // Restore session from localStorage on mount
+  useEffect(() => {
+    const savedUser = localStorage.getItem('user');
+    const savedRole = localStorage.getItem('currentRole');
+    if (savedUser) {
+      try {
+        setUser(JSON.parse(savedUser));
+        if (savedRole) {
+          setCurrentRole(savedRole as any);
+        }
+      } catch (e) {
+        console.error('Failed to parse saved user:', e);
+      }
+    }
+    setLoading(false);
+  }, []);
+
+  const login = async (email: string, password: string): Promise<boolean> => {
+    try {
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+
+      if (!response.ok) {
+        return false;
+      }
+
+      const authenticatedUser = await response.json();
+      setUser(authenticatedUser);
+      localStorage.setItem('user', JSON.stringify(authenticatedUser));
+
+      // Set default role based on user permissions
+      let defaultRole: 'department_head' | 'lecturer' | 'moderator' = 'lecturer';
+      if (authenticatedUser.isDepartmentHead) {
+        defaultRole = 'department_head';
+      } else if (authenticatedUser.isLecturer) {
+        defaultRole = 'lecturer';
+      } else if (authenticatedUser.isModerator) {
+        defaultRole = 'moderator';
+      }
+      
+      setCurrentRole(defaultRole);
+      localStorage.setItem('currentRole', defaultRole);
+
+      return true;
+    } catch (error) {
+      console.error('Login error:', error);
+      return false;
+    }
+  };
+
+  const logout = () => {
+    setUser(null);
+    localStorage.removeItem('user');
+    localStorage.removeItem('currentRole');
+  };
+
+  const updateProfile = async (updates: { name?: string; contact?: string }) => {
+    if (!user) return;
+    try {
+      const response = await fetch(`/api/users/${user.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updates),
+      });
+
+      if (response.ok) {
+        const updatedUser = { ...user, ...updates };
+        setUser(updatedUser);
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+      }
+    } catch (error) {
+      console.error('Update profile error:', error);
+    }
+  };
+
+  const changePassword = async (currentPassword: string, newPassword: string): Promise<boolean> => {
+    if (!user) return false;
+    try {
+      const response = await fetch(`/api/users/${user.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ currentPassword, newPassword }),
+      });
+
+      return response.ok;
+    } catch (error) {
+      console.error('Change password error:', error);
+      return false;
+    }
+  };
+
+  const handleSetCurrentRole = (role: 'department_head' | 'lecturer' | 'moderator') => {
+    setCurrentRole(role);
+    localStorage.setItem('currentRole', role);
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  return (
+    <AuthContext.Provider
+      value={{
+        user,
+        login,
+        logout,
+        currentRole,
+        setCurrentRole: handleSetCurrentRole,
+        updateProfile,
+        changePassword,
+      }}
+    >
+      {children}
+    </AuthContext.Provider>
+  );
+}
+
+export function useAuth() {
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+}

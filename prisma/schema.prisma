@@ -1,0 +1,109 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum UserRole {
+  DEPARTMENT_HEAD
+  LECTURER
+  MODERATOR
+}
+
+enum PaperStatus {
+  DRAFT
+  UNDER_MODERATION
+  REVISION_REQUIRED
+  FINALIZED
+}
+
+model User {
+  id          String   @id @default(cuid())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  email       String   @unique
+  name        String
+  password    String
+  role        UserRole
+  contact     String?
+
+  department  String?
+
+  // relations
+  lecturedSubjects   Subject[] @relation("LecturerSubjects")
+  moderatedSubjects  Subject[] @relation("ModeratorSubjects")
+
+  papers      Paper[]
+  reports     ModerationReport[]
+}
+
+model Subject {
+  id            String   @id @default(cuid())
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  code          String   @unique
+  name          String
+  academicYear  String
+  semester      Int
+
+  lecturerId    String?
+  lecturer      User? @relation("LecturerSubjects", fields: [lecturerId], references: [id])
+
+  moderatorId   String?
+  moderator     User? @relation("ModeratorSubjects", fields: [moderatorId], references: [id])
+
+  papers        Paper[]
+}
+
+model Paper {
+  id                String   @id @default(cuid())
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  subjectId         String
+  subject           Subject @relation(fields: [subjectId], references: [id])
+
+  lecturerId        String
+  lecturer          User @relation(fields: [lecturerId], references: [id])
+
+  academicYear      String
+  semester          Int
+
+  status            PaperStatus @default(DRAFT)
+
+  paperUrl          String?
+  markingSchemeUrl  String?
+
+  moderationReport  ModerationReport?
+}
+
+model ModerationReport {
+  id              String   @id @default(cuid())
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  paperId         String   @unique
+  paper           Paper    @relation(fields: [paperId], references: [id])
+
+  moderatorId     String
+  moderator       User     @relation(fields: [moderatorId], references: [id])
+
+  remarks         Json
+  additionalComments String?
+  followUpActions Json?
+  moderatorSignatureUrl String?
+  lecturerSignatureUrl String?
+}
+
+model SystemSetting {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String
+  updatedAt DateTime @updatedAt
+}

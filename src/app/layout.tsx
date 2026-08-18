@@ -14,8 +14,20 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Paper Moderation System",
-  description: "Next.js starter project with HeroUI and Tailwind for the paper moderation system.",
+  title: "Paper Moderation System | Wayamba University of Sri Lanka",
+  description: "Examination Question Paper & Marking Scheme Moderation System — Faculty of Applied Sciences, Wayamba University of Sri Lanka.",
+  keywords: ["Paper Moderation", "Wayamba University", "Faculty of Applied Sciences", "Exam Moderation System"],
+  openGraph: {
+    title: "Paper Moderation System | Wayamba University of Sri Lanka",
+    description: "Digital Question Paper & Marking Scheme Moderation Portal — Faculty of Applied Sciences.",
+    siteName: "Paper Moderation System",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Paper Moderation System | Wayamba University of Sri Lanka",
+    description: "Digital Question Paper & Marking Scheme Moderation Portal — Faculty of Applied Sciences.",
+  },
 };
 
 export default function RootLayout({

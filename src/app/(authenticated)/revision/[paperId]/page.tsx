@@ -5,6 +5,7 @@ import { useRouter, useParams } from 'next/navigation';
 import { ArrowLeft, Download, Upload, FileText, CheckCircle, Loader2 } from 'lucide-react';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import { useToast } from '@/components/Toast';
 
 export default function PaperRevisionPage() {
   const router = useRouter();
@@ -19,6 +20,7 @@ export default function PaperRevisionPage() {
   const [finalPaperFile, setFinalPaperFile] = useState<File | null>(null);
   const [finalMarkingSchemeFile, setFinalMarkingSchemeFile] = useState<File | null>(null);
   const [lecturerSignatureFile, setLecturerSignatureFile] = useState<File | null>(null);
+  const { showToast, ToastElement } = useToast();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -254,16 +256,16 @@ export default function PaperRevisionPage() {
   const handleFinalize = async () => {
     if (isFinalized) return;
     if (!finalPaperFile || !finalMarkingSchemeFile) {
-      alert('Please upload both final paper and marking scheme');
+      showToast('Please upload both final paper and marking scheme', 'warning');
       return;
     }
     const filledActions = followUpActions.filter(a => a.trim());
     if (filledActions.length === 0) {
-      alert('Please add at least one follow-up action');
+      showToast('Please add at least one follow-up action', 'warning');
       return;
     }
     if (!lecturerSignatureFile) {
-      alert('Please upload your signature image');
+      showToast('Please upload your signature image', 'warning');
       return;
     }
 
@@ -302,14 +304,14 @@ export default function PaperRevisionPage() {
       });
 
       if (reportRes.ok && paperRes.ok) {
-        alert('Paper finalized successfully! It is now locked and viewable in History.');
-        router.push('/lecturer/dashboard');
+        showToast('Paper finalized successfully! It is now locked and viewable in History.', 'success');
+        setTimeout(() => router.push('/lecturer/dashboard'), 1500);
       } else {
-        alert('Failed to finalize paper');
+        showToast('Failed to finalize paper', 'error');
       }
     } catch (e: any) {
       console.error(e);
-      alert(e.message || 'An error occurred during finalization');
+      showToast(e.message || 'An error occurred during finalization', 'error');
     } finally {
       setFinalizing(false);
     }
@@ -321,6 +323,7 @@ export default function PaperRevisionPage() {
 
   return (
     <div className="p-8">
+      {ToastElement}
       <button
         onClick={handleCancel}
         className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-6"

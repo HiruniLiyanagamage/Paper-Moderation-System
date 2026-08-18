@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { ArrowLeft, Send, Eye, Download, Upload } from 'lucide-react';
 import { useAuth } from '@/lib/AuthContext';
+import { useToast } from '@/components/Toast';
 
 export default function ModeratorFormPage() {
   const router = useRouter();
@@ -15,6 +16,7 @@ export default function ModeratorFormPage() {
   const [loading, setLoading] = useState(true);
   const [signatureFile, setSignatureFile] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const { showToast, ToastElement } = useToast();
   const [remarks, setRemarks] = useState({
     standardAppropriate: false,
     coversMainContents: false,
@@ -100,11 +102,11 @@ export default function ModeratorFormPage() {
 
   const handleSubmit = async () => {
     if (!additionalComments.trim()) {
-      alert('Please add additional comments');
+      showToast('Please add additional comments', 'warning');
       return;
     }
     if (!signatureFile) {
-      alert('Please upload your signature image');
+      showToast('Please upload your signature image', 'warning');
       return;
     }
     if (!user) return;
@@ -137,14 +139,14 @@ export default function ModeratorFormPage() {
           }),
         });
 
-        alert('Moderation report submitted successfully!');
-        router.push('/moderator/dashboard');
+        showToast('Moderation report submitted successfully!', 'success');
+        setTimeout(() => router.push('/moderator/dashboard'), 1500);
       } else {
-        alert('Failed to submit moderation report');
+        showToast('Failed to submit moderation report', 'error');
       }
     } catch (e: any) {
       console.error(e);
-      alert(e.message || 'An error occurred while submitting');
+      showToast(e.message || 'An error occurred while submitting', 'error');
     } finally {
       setSubmitting(false);
     }
@@ -156,6 +158,7 @@ export default function ModeratorFormPage() {
 
   return (
     <div className="p-8">
+      {ToastElement}
       <button
         onClick={handleCancel}
         className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-6"

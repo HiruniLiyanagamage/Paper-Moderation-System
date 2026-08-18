@@ -15,7 +15,7 @@ export interface User {
 
 interface AuthContextType {
   user: User | null;
-  login: (email: string, password: string) => Promise<boolean>;
+  login: (email: string, password: string, department: string) => Promise<boolean>;
   logout: () => void;
   currentRole: 'department_head' | 'lecturer' | 'moderator';
   setCurrentRole: (role: 'department_head' | 'lecturer' | 'moderator') => void;
@@ -47,12 +47,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setLoading(false);
   }, []);
 
-  const login = async (email: string, password: string): Promise<boolean> => {
+  const login = async (email: string, password: string, department: string): Promise<boolean> => {
     try {
       const response = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email, password, department }),
       });
 
       if (!response.ok) {

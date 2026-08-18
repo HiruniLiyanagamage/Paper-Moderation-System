@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { RoleSwitcher } from '@/components/RoleSwitcher';
 import Link from 'next/link';
-import { FileText, Clock, AlertCircle, CheckCircle, Circle } from 'lucide-react';
+import { FileText, Clock, AlertCircle, CheckCircle, Circle, Eye } from 'lucide-react';
 import { useAuth } from '@/lib/AuthContext';
 
 export default function LecturerDashboard() {
@@ -121,16 +121,46 @@ export default function LecturerDashboard() {
                 <td className="px-6 py-4 text-gray-600">Semester {paper.semester}</td>
                 <td className="px-6 py-4">{getStatusBadge(paper.status)}</td>
                 <td className="px-6 py-4">
-                  <Link
-                    href={
-                      paper.status === 'revision_required'
-                        ? `/revision/${paper.id}`
-                        : `/subject/${paper.subjectId}`
-                    }
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors inline-block text-center min-w-[140px]"
-                  >
-                    {paper.status === 'revision_required' ? 'Review Feedback' : 'Open'}
-                  </Link>
+                  {paper.status === 'under_moderation' ? (
+                    <div className="flex items-center gap-2">
+                      {paper.paperUrl ? (
+                        <a
+                          href={paper.paperUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 rounded-lg text-xs font-medium transition-colors whitespace-nowrap"
+                        >
+                          <Eye className="w-3.5 h-3.5" />
+                          View Paper
+                        </a>
+                      ) : null}
+                      {paper.markingSchemeUrl ? (
+                        <a
+                          href={paper.markingSchemeUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200 rounded-lg text-xs font-medium transition-colors whitespace-nowrap"
+                        >
+                          <Eye className="w-3.5 h-3.5" />
+                          View Scheme
+                        </a>
+                      ) : null}
+                    </div>
+                  ) : paper.status === 'revision_required' ? (
+                    <Link
+                      href={`/revision/${paper.id}`}
+                      className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors inline-block text-center min-w-[160px]"
+                    >
+                      Review Feedback
+                    </Link>
+                  ) : (
+                    <Link
+                      href={`/subject/${paper.subjectId}`}
+                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors inline-block text-center min-w-[160px]"
+                    >
+                      Open
+                    </Link>
+                  )}
                 </td>
               </tr>
             ))}

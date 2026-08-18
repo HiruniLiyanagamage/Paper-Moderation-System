@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { ArrowLeft, Upload, Users, Send, Loader2 } from 'lucide-react';
+import { ArrowLeft, Upload, Users, Send, Loader2, Clock, Eye } from 'lucide-react';
 import { useAuth } from '@/lib/AuthContext';
+import { useToast } from '@/components/Toast';
 
 export default function SubjectDetailsPage() {
   const router = useRouter();
@@ -13,10 +14,13 @@ export default function SubjectDetailsPage() {
 
   const [subject, setSubject] = useState<any>(null);
   const [existingPaperId, setExistingPaperId] = useState<string | null>(null);
+  const [existingPaperStatus, setExistingPaperStatus] = useState<string | null>(null);
+  const [submittedPaper, setSubmittedPaper] = useState<any>(null);
   const [paperFile, setPaperFile] = useState<File | null>(null);
   const [markingSchemeFile, setMarkingSchemeFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
+  const { showToast, ToastElement } = useToast();
 
   useEffect(() => {
     const fetchSubjectAndPapers = async () => {
@@ -25,9 +29,11 @@ export default function SubjectDetailsPage() {
         if (res.ok) {
           const data = await res.json();
           setSubject(data);
-          
+
           if (data.papers && data.papers.length > 0) {
             setExistingPaperId(data.papers[0].id);
+            setExistingPaperStatus(data.papers[0].status);
+            setSubmittedPaper(data.papers[0]);
           }
         }
       } catch (e) {
@@ -72,14 +78,13 @@ export default function SubjectDetailsPage() {
 
   const handleSubmitForReview = async () => {
     if (!paperFile || !markingSchemeFile) {
-      alert('Please upload both paper and marking scheme');
+      showToast('Please upload both paper and marking scheme', 'warning');
       return;
     }
     if (!user || !subject) return;
 
     setUploading(true);
     try {
-      // Upload files to Supabase Storage
       const [paperUrl, markingSchemeUrl] = await Promise.all([
         uploadFile(paperFile, `papers/${subjectId}`),
         uploadFile(markingSchemeFile, `marking-schemes/${subjectId}`),
@@ -113,14 +118,14 @@ export default function SubjectDetailsPage() {
       }
 
       if (response.ok) {
-        alert('Paper submitted for review!');
-        router.push('/lecturer/dashboard');
+        showToast('Paper submitted for review!', 'success');
+        setTimeout(() => router.push('/lecturer/dashboard'), 1500);
       } else {
-        alert('Failed to submit paper for review');
+        showToast('Failed to submit paper for review', 'error');
       }
     } catch (error: any) {
       console.error(error);
-      alert(error.message || 'An error occurred while submitting');
+      showToast(error.message || 'An error occurred while submitting', 'error');
     } finally {
       setUploading(false);
     }
@@ -150,8 +155,11 @@ export default function SubjectDetailsPage() {
     );
   }
 
+  const isUnderModeration = existingPaperStatus === 'under_moderation';
+
   return (
     <div className="p-8">
+      {ToastElement}
       <button
         onClick={handleCancel}
         className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-6"
@@ -160,6 +168,7 @@ export default function SubjectDetailsPage() {
         Back to Dashboard
       </button>
 
+      {/* Subject info card */}
       <div className="bg-white rounded-lg shadow p-6 mb-6">
         <h1 className="text-2xl font-bold text-gray-900 mb-4">Upload Examination Paper</h1>
         <div className="grid grid-cols-2 gap-4 text-sm">
@@ -182,101 +191,174 @@ export default function SubjectDetailsPage() {
         </div>
       </div>
 
-      <div className="bg-white rounded-lg shadow p-6 mb-6">
-        <h2 className="text-xl font-semibold mb-6">Upload Files</h2>
-
+      {/* Under moderation view section */}
+      {isUnderModeration && (
         <div className="space-y-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-3">
-              Examination Paper (PDF)
-            </label>
-            <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 hover:border-blue-500 transition-colors">
-              <input
-                type="file"
-                accept=".pdf"
-                onChange={handlePaperUpload}
-                className="hidden"
-                id="paper-upload"
-              />
-              <label
-                htmlFor="paper-upload"
-                className="flex flex-col items-center justify-center cursor-pointer"
-              >
-                <Upload className="w-12 h-12 text-gray-400 mb-2" />
-                <span className="text-sm text-gray-600">
-                  {paperFile ? paperFile.name : 'Click to upload paper'}
-                </span>
-                {paperFile && (
-                  <span className="text-xs text-green-600 mt-1">✓ File selected</span>
-                )}
-              </label>
+          <div className="bg-yellow-50 border border-yellow-300 rounded-lg p-6">
+            <div className="flex items-start gap-4">
+              <div className="w-10 h-10 rounded-full bg-yellow-100 flex items-center justify-center flex-shrink-0">
+                <Clock className="w-5 h-5 text-yellow-600" />
+              </div>
+              <div>
+                <h2 className="font-semibold text-yellow-800 text-lg">Paper Under Moderation</h2>
+                <p className="text-yellow-700 text-sm mt-1">
+                  Your paper has been submitted and is currently being reviewed by the moderator.
+                  You cannot upload or edit files until the moderator has returned their feedback.
+                </p>
+                <p className="text-yellow-600 text-xs mt-2 font-medium">
+                  You will be able to make revisions once you receive the moderation report.
+                </p>
+              </div>
             </div>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-3">
-              Marking Scheme (PDF)
-            </label>
-            <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 hover:border-blue-500 transition-colors">
-              <input
-                type="file"
-                accept=".pdf"
-                onChange={handleMarkingSchemeUpload}
-                className="hidden"
-                id="marking-scheme-upload"
-              />
-              <label
-                htmlFor="marking-scheme-upload"
-                className="flex flex-col items-center justify-center cursor-pointer"
-              >
-                <Upload className="w-12 h-12 text-gray-400 mb-2" />
-                <span className="text-sm text-gray-600">
-                  {markingSchemeFile ? markingSchemeFile.name : 'Click to upload marking scheme'}
-                </span>
-                {markingSchemeFile && (
-                  <span className="text-xs text-green-600 mt-1">✓ File selected</span>
-                )}
-              </label>
+          {/* Submitted Files View Card */}
+          <div className="bg-white rounded-lg shadow p-6">
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">Submitted Files for Review</h2>
+            <p className="text-sm text-gray-600 mb-4">You can view the documents you submitted below:</p>
+            <div className="flex flex-wrap gap-4">
+              {submittedPaper?.paperUrl ? (
+                <a
+                  href={submittedPaper.paperUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 px-5 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition-colors"
+                >
+                  <Eye className="w-5 h-5" />
+                  View Submitted Paper (PDF)
+                </a>
+              ) : (
+                <span className="px-4 py-3 bg-gray-100 text-gray-400 rounded-lg font-medium">Paper unavailable</span>
+              )}
+
+              {submittedPaper?.markingSchemeUrl ? (
+                <a
+                  href={submittedPaper.markingSchemeUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 px-5 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition-colors"
+                >
+                  <Eye className="w-5 h-5" />
+                  View Submitted Marking Scheme (PDF)
+                </a>
+              ) : (
+                <span className="px-4 py-3 bg-gray-100 text-gray-400 rounded-lg font-medium">Marking scheme unavailable</span>
+              )}
+            </div>
+          </div>
+
+          <div className="bg-white rounded-lg shadow p-6 mb-6">
+            <div className="flex items-center gap-2 mb-3">
+              <Users className="w-5 h-5 text-gray-600" />
+              <h2 className="text-lg font-semibold">Assigned Moderator</h2>
+            </div>
+            <div className="bg-gray-50 rounded-lg p-4">
+              <p className="font-medium">{subject.moderator?.name || 'Not assigned'}</p>
             </div>
           </div>
         </div>
-      </div>
+      )}
 
-      <div className="bg-white rounded-lg shadow p-6 mb-6">
-        <div className="flex items-center gap-2 mb-3">
-          <Users className="w-5 h-5 text-gray-600" />
-          <h2 className="text-lg font-semibold">Assigned Moderator</h2>
-        </div>
-        <div className="bg-gray-50 rounded-lg p-4">
-          <p className="font-medium">{subject.moderator?.name || 'Not assigned'}</p>
-        </div>
-      </div>
+      {/* Upload section — hidden while under moderation */}
+      {!isUnderModeration && (
+        <>
+          <div className="bg-white rounded-lg shadow p-6 mb-6">
+            <h2 className="text-xl font-semibold mb-6">Upload Files</h2>
 
-      <div className="flex gap-3">
-        <button
-          onClick={handleSubmitForReview}
-          disabled={uploading}
-          className="flex-1 flex items-center justify-center gap-2 bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {uploading ? (
-            <>
-              <Loader2 className="w-5 h-5 animate-spin" />
-              Uploading &amp; Submitting...
-            </>
-          ) : (
-            <>
-              <Send className="w-5 h-5" />
-              Submit for Review
-            </>
-          )}
-        </button>
-        <button
-          onClick={handleCancel}
-          className="px-6 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium"
-        >
-          Cancel
-        </button>
-      </div>
+            <div className="space-y-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-3">
+                  Examination Paper (PDF)
+                </label>
+                <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 hover:border-blue-500 transition-colors">
+                  <input
+                    type="file"
+                    accept=".pdf"
+                    onChange={handlePaperUpload}
+                    className="hidden"
+                    id="paper-upload"
+                  />
+                  <label
+                    htmlFor="paper-upload"
+                    className="flex flex-col items-center justify-center cursor-pointer"
+                  >
+                    <Upload className="w-12 h-12 text-gray-400 mb-2" />
+                    <span className="text-sm text-gray-600">
+                      {paperFile ? paperFile.name : 'Click to upload paper'}
+                    </span>
+                    {paperFile && (
+                      <span className="text-xs text-green-600 mt-1">✓ File selected</span>
+                    )}
+                  </label>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-3">
+                  Marking Scheme (PDF)
+                </label>
+                <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 hover:border-blue-500 transition-colors">
+                  <input
+                    type="file"
+                    accept=".pdf"
+                    onChange={handleMarkingSchemeUpload}
+                    className="hidden"
+                    id="marking-scheme-upload"
+                  />
+                  <label
+                    htmlFor="marking-scheme-upload"
+                    className="flex flex-col items-center justify-center cursor-pointer"
+                  >
+                    <Upload className="w-12 h-12 text-gray-400 mb-2" />
+                    <span className="text-sm text-gray-600">
+                      {markingSchemeFile ? markingSchemeFile.name : 'Click to upload marking scheme'}
+                    </span>
+                    {markingSchemeFile && (
+                      <span className="text-xs text-green-600 mt-1">✓ File selected</span>
+                    )}
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-lg shadow p-6 mb-6">
+            <div className="flex items-center gap-2 mb-3">
+              <Users className="w-5 h-5 text-gray-600" />
+              <h2 className="text-lg font-semibold">Assigned Moderator</h2>
+            </div>
+            <div className="bg-gray-50 rounded-lg p-4">
+              <p className="font-medium">{subject.moderator?.name || 'Not assigned'}</p>
+            </div>
+          </div>
+
+          <div className="flex gap-3">
+            <button
+              onClick={handleSubmitForReview}
+              disabled={uploading}
+              className="flex-1 flex items-center justify-center gap-2 bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {uploading ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  Uploading &amp; Submitting...
+                </>
+              ) : (
+                <>
+                  <Send className="w-5 h-5" />
+                  Submit for Review
+                </>
+              )}
+            </button>
+            <button
+              onClick={handleCancel}
+              className="px-6 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+            >
+              Cancel
+            </button>
+          </div>
+        </>
+      )}
     </div>
   );
 }

@@ -27,9 +27,16 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const lecturerId = searchParams.get("lecturerId");
     const moderatorId = searchParams.get("moderatorId");
+    const department = searchParams.get("department");
+
+    const where: any = {};
+    if (department) {
+      where.subject = { department };
+    }
 
     // Fetch all real papers from database
     const dbPapers = await prisma.paper.findMany({
+      where,
       include: {
         subject: {
           include: {

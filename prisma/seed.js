@@ -7,26 +7,97 @@ const prisma = new PrismaClient();
 
 async function main() {
   const users = [
+    // 1. Department of Computing & Information Systems
+    {
+      email: 'hod.cis@wayamba.lk',
+      name: 'Dr. Sarah Johnson (HOD CIS)',
+      password: 'password',
+      role: 'DEPARTMENT_HEAD',
+      department: 'Department of Computing & Information Systems',
+    },
+    {
+      email: 'lecturer.cis@wayamba.lk',
+      name: 'Mr. WCC Premarathna (CIS)',
+      password: 'password',
+      role: 'LECTURER',
+      department: 'Department of Computing & Information Systems',
+    },
+    {
+      email: 'lecturer2.cis@wayamba.lk',
+      name: 'Dr. Jane Smith (CIS)',
+      password: 'password',
+      role: 'LECTURER',
+      department: 'Department of Computing & Information Systems',
+    },
+    // Keep legacy logins to not break anything
     {
       email: 'head@example.com',
       name: 'Dr. Sarah Johnson',
       password: 'password',
       role: 'DEPARTMENT_HEAD',
-      department: 'Department of Computing and Information Systems',
+      department: 'Department of Computing & Information Systems',
     },
     {
       email: 'lecturer@example.com',
       name: 'Mr. WCC Premarathna',
       password: 'password',
       role: 'LECTURER',
-      department: 'Department of Computing and Information Systems',
+      department: 'Department of Computing & Information Systems',
     },
     {
       email: 'lecturer2@example.com',
       name: 'Dr. Jane Smith',
       password: 'password',
-      role: 'MODERATOR',
-      department: 'Department of Computing and Information Systems',
+      role: 'LECTURER',
+      department: 'Department of Computing & Information Systems',
+    },
+
+    // 2. Department of Electronics
+    {
+      email: 'hod.el@wayamba.lk',
+      name: 'Prof. Allen Croft (HOD EL)',
+      password: 'password',
+      role: 'DEPARTMENT_HEAD',
+      department: 'Department of Electronics',
+    },
+    {
+      email: 'lecturer.el@wayamba.lk',
+      name: 'Dr. Bruce Banner (EL)',
+      password: 'password',
+      role: 'LECTURER',
+      department: 'Department of Electronics',
+    },
+
+    // 3. Department of Industrial Management
+    {
+      email: 'hod.im@wayamba.lk',
+      name: 'Prof. Charles Xavier (HOD IM)',
+      password: 'password',
+      role: 'DEPARTMENT_HEAD',
+      department: 'Department of Industrial Management',
+    },
+    {
+      email: 'lecturer.im@wayamba.lk',
+      name: 'Dr. Tony Stark (IM)',
+      password: 'password',
+      role: 'LECTURER',
+      department: 'Department of Industrial Management',
+    },
+
+    // 4. Department of Mathematical Sciences
+    {
+      email: 'hod.ms@wayamba.lk',
+      name: 'Prof. Diana Prince (HOD MS)',
+      password: 'password',
+      role: 'DEPARTMENT_HEAD',
+      department: 'Department of Mathematical Sciences',
+    },
+    {
+      email: 'lecturer.ms@wayamba.lk',
+      name: 'Dr. Reed Richards (MS)',
+      password: 'password',
+      role: 'LECTURER',
+      department: 'Department of Mathematical Sciences',
     },
   ];
 
@@ -54,6 +125,7 @@ async function main() {
       semester: 1,
       lecturerId: lecturer1.id,
       moderatorId: lecturer2.id,
+      department: 'Department of Computing & Information Systems',
     },
     {
       code: 'CMIS 3124',
@@ -62,12 +134,14 @@ async function main() {
       semester: 1,
       lecturerId: lecturer2.id,
       moderatorId: lecturer1.id,
+      department: 'Department of Computing & Information Systems',
     },
     {
       code: 'CMIS 3114',
       name: 'Software Engineering',
       academicYear: '2025/2026',
       semester: 1,
+      department: 'Department of Computing & Information Systems',
     },
   ];
 

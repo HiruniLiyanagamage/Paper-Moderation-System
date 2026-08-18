@@ -1,9 +1,14 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
+    const { searchParams } = new URL(request.url);
+    const department = searchParams.get("department");
+    const where = department ? { department } : {};
+
     const subjects = await prisma.subject.findMany({
+      where,
       include: {
         lecturer: true,
         moderator: true,
@@ -19,7 +24,7 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { code, name, academicYear, semester, lecturerId, moderatorId } = body;
+    const { code, name, academicYear, semester, lecturerId, moderatorId, department } = body;
 
     if (!code || !name || !academicYear || !semester) {
       return NextResponse.json(
@@ -47,6 +52,7 @@ export async function POST(request: Request) {
         semester: Number(semester),
         lecturerId: lecturerId || null,
         moderatorId: moderatorId || null,
+        department: department || null,
       },
     });
 

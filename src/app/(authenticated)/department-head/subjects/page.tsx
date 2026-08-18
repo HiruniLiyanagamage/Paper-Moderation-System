@@ -16,8 +16,10 @@ export default function SubjectManagementPage() {
   const [loading, setLoading] = useState(true);
 
   const fetchSubjects = async () => {
+    if (!user) return;
     try {
-      const res = await fetch('/api/subjects');
+      const dept = user.department || 'Department of Computing & Information Systems';
+      const res = await fetch(`/api/subjects?department=${encodeURIComponent(dept)}`);
       if (res.ok) {
         const data = await res.json();
         setSubjects(data);
@@ -104,14 +106,14 @@ export default function SubjectManagementPage() {
         <div className="flex gap-3">
           <Link
             href="/dashboard"
-            className="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-2 text-gray-700 hover:bg-gray-100"
+            className="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
             Back to dashboard
           </Link>
           <Link
             href="/add-subject"
-            className="inline-flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-white hover:bg-green-700"
+            className="inline-flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-green-700 transition-colors"
           >
             <BookOpen className="w-4 h-4" />
             Add Subject
@@ -126,7 +128,6 @@ export default function SubjectManagementPage() {
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Code</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Semester</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Lecturer</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
             </tr>
           </thead>
@@ -171,19 +172,18 @@ export default function SubjectManagementPage() {
                     `Semester ${subject.semester}`
                   )}
                 </td>
-                <td className="px-6 py-4 text-gray-700">{subject.lecturer?.name ?? 'Unassigned'}</td>
-                <td className="px-6 py-4 space-x-2 text-sm">
+                <td className="px-6 py-4 space-x-2 text-sm whitespace-nowrap">
                   {editingId === subject.id ? (
                     <>
                       <button
                         onClick={saveSubject}
-                        className="rounded-xl bg-green-600 px-3 py-2 text-white hover:bg-green-700"
+                        className="inline-flex items-center justify-center gap-1.5 h-9 px-4 text-sm font-medium rounded-xl bg-green-600 text-white hover:bg-green-700 transition-colors"
                       >
                         Save
                       </button>
                       <button
                         onClick={cancelEditing}
-                        className="rounded-xl bg-gray-200 px-3 py-2 text-gray-700 hover:bg-gray-300"
+                        className="inline-flex items-center justify-center gap-1.5 h-9 px-4 text-sm font-medium rounded-xl bg-gray-200 text-gray-700 hover:bg-gray-300 transition-colors"
                       >
                         Cancel
                       </button>
@@ -192,15 +192,17 @@ export default function SubjectManagementPage() {
                     <>
                       <button
                         onClick={() => startEditing(subject)}
-                        className="rounded-xl bg-blue-600 px-3 py-2 text-white hover:bg-blue-700"
+                        className="inline-flex items-center justify-center gap-1.5 h-9 px-4 text-sm font-medium rounded-xl bg-blue-600 text-white hover:bg-blue-700 transition-colors"
                       >
+                        <Edit2 className="w-3.5 h-3.5" />
                         Edit
                       </button>
                       <button
                         onClick={() => deleteSubject(subject.id)}
-                        className="rounded-xl bg-red-600 px-3 py-2 text-white hover:bg-red-700"
+                        className="inline-flex items-center justify-center gap-1.5 h-9 px-4 text-sm font-medium rounded-xl bg-red-600 text-white hover:bg-red-700 transition-colors"
                       >
-                        <Trash2 className="w-4 h-4" />
+                        <Trash2 className="w-3.5 h-3.5" />
+                        Delete
                       </button>
                     </>
                   )}

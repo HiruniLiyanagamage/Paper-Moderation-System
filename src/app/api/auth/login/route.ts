@@ -3,11 +3,11 @@ import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
   try {
-    const { email, password } = await request.json();
+    const { email, password, department } = await request.json();
 
-    if (!email || !password) {
+    if (!email || !password || !department) {
       return NextResponse.json(
-        { error: "Email and password are required" },
+        { error: "Email, password and department are required" },
         { status: 400 }
       );
     }
@@ -23,6 +23,15 @@ export async function POST(request: Request) {
       );
     }
 
+    // Verify department selection matches (normalizing spaces and ampersand variants)
+    const normalizeDept = (d: string) => d.toLowerCase().replace(/and/g, "&").replace(/\s+/g, " ").trim();
+    if (normalizeDept(dbUser.department || "") !== normalizeDept(department)) {
+      return NextResponse.json(
+        { error: "Incorrect department selected for this user" },
+        { status: 401 }
+      );
+    }
+
     const mappedUser = {
       id: dbUser.id,
       name: dbUser.name,
@@ -30,7 +39,7 @@ export async function POST(request: Request) {
       isDepartmentHead: dbUser.role === "DEPARTMENT_HEAD",
       isLecturer: true,
       isModerator: true,
-      department: dbUser.department || "Department of Computing and Information Systems",
+      department: dbUser.department || "Department of Computing & Information Systems",
       contact: dbUser.contact || "",
     };
 

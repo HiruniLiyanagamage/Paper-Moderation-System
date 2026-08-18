@@ -4,11 +4,13 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { UserPlus, ArrowLeft } from 'lucide-react';
 import { useAuth } from '@/lib/AuthContext';
+import { useToast } from '@/components/Toast';
 
 export default function AddLecturerPage() {
   const router = useRouter();
   const { user, currentRole } = useAuth();
   const [error, setError] = useState('');
+  const { showToast, ToastElement } = useToast();
 
   useEffect(() => {
     if (!user?.isDepartmentHead || currentRole !== 'department_head') {
@@ -21,7 +23,6 @@ export default function AddLecturerPage() {
     email: '',
     password: '',
     contact: '',
-    department: 'Department of Computing and Information Systems',
     isLecturer: true,
     isModerator: true,
     isDepartmentHead: false,
@@ -31,11 +32,36 @@ export default function AddLecturerPage() {
     e.preventDefault();
     setError('');
 
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email.trim())) {
+      setError('Please enter a valid email address.');
+      return;
+    }
+
+    // Password validation (at least 6 characters)
+    if (formData.password.length < 6) {
+      setError('Password must be at least 6 characters long.');
+      return;
+    }
+
+    // Contact number validation (must be exactly 10 digits if provided)
+    const digitsOnly = formData.contact.replace(/\D/g, '');
+    if (formData.contact.trim() && digitsOnly.length !== 10) {
+      setError('Contact number must be exactly 10 digits.');
+      return;
+    }
+
     try {
       const response = await fetch('/api/users', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          ...formData,
+          email: formData.email.trim(),
+          contact: digitsOnly || null,
+          department: user?.department || 'Department of Computing & Information Systems',
+        }),
       });
 
       if (!response.ok) {
@@ -44,8 +70,8 @@ export default function AddLecturerPage() {
         return;
       }
 
-      alert('Lecturer added successfully! They can now log in with their email and password.');
-      router.push('/department-head/lecturers');
+      showToast('Lecturer added successfully! They can now log in with their email and password.', 'success');
+      setTimeout(() => router.push('/department-head/lecturers'), 1500);
     } catch (e: any) {
       setError(e.message || 'An error occurred. Please try again.');
     }
@@ -53,6 +79,7 @@ export default function AddLecturerPage() {
 
   return (
     <div className="p-8">
+      {ToastElement}
       <button
         onClick={() => router.push('/dashboard')}
         className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-6"
@@ -93,13 +120,34 @@ export default function AddLecturerPage() {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Contact Number</label>
-              <input
-                type="text"
-                value={formData.contact}
-                onChange={(e) => setFormData({ ...formData, contact: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="e.g. 071-123-4567"
-              />
+              <div className="relative">
+                <input
+                  type="text"
+                  value={formData.contact}
+                  onChange={(e) => {
+                    const digitsOnly = e.target.value.replace(/\D/g, '');
+                    if (digitsOnly.length <= 10) {
+                      setFormData({ ...formData, contact: digitsOnly });
+                    }
+                  }}
+                  className={`w-full px-4 py-2 pr-14 border rounded-lg focus:outline-none focus:ring-2 ${
+                    formData.contact.length > 0 && formData.contact.length !== 10
+                      ? 'border-red-400 focus:ring-red-200'
+                      : 'border-gray-300 focus:ring-blue-500'
+                  }`}
+                  placeholder="e.g. 0711234567"
+                  maxLength={10}
+                  inputMode="numeric"
+                />
+                <span className={`absolute right-3 top-1/2 -translate-y-1/2 text-xs font-mono ${
+                  formData.contact.length === 10 ? 'text-green-600' : 'text-gray-400'
+                }`}>
+                  {formData.contact.length}/10
+                </span>
+              </div>
+              {formData.contact.length > 0 && formData.contact.length !== 10 && (
+                <p className="text-xs text-red-500 mt-1">Must be exactly 10 digits.</p>
+              )}
             </div>
           </div>
 
@@ -109,10 +157,17 @@ export default function AddLecturerPage() {
               type="email"
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 ${
+                formData.email.length > 0 && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())
+                  ? 'border-red-400 focus:ring-red-200'
+                  : 'border-gray-300 focus:ring-blue-500'
+              }`}
               placeholder="e.g. jane.smith@wayamba.lk"
               required
             />
+            {formData.email.length > 0 && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim()) && (
+              <p className="text-xs text-red-500 mt-1">Please enter a valid email address.</p>
+            )}
           </div>
 
           <div>
@@ -121,22 +176,20 @@ export default function AddLecturerPage() {
               type="password"
               value={formData.password}
               onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Initial password"
+              className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 ${
+                formData.password.length > 0 && formData.password.length < 6
+                  ? 'border-red-400 focus:ring-red-200'
+                  : 'border-gray-300 focus:ring-blue-500'
+              }`}
+              placeholder="At least 6 characters"
               required
             />
+            {formData.password.length > 0 && formData.password.length < 6 && (
+              <p className="text-xs text-red-500 mt-1">Password must be at least 6 characters long.</p>
+            )}
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Department</label>
-            <input
-              type="text"
-              value={formData.department}
-              onChange={(e) => setFormData({ ...formData, department: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
-            />
-          </div>
+
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-3">Roles</label>

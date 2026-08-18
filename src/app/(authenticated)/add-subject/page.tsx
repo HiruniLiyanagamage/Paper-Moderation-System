@@ -4,11 +4,13 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { BookOpen, ArrowLeft } from 'lucide-react';
 import { useAuth } from '@/lib/AuthContext';
+import { useToast } from '@/components/Toast';
 
 export default function AddSubjectPage() {
   const router = useRouter();
   const { user, currentRole } = useAuth();
   const [error, setError] = useState('');
+  const { showToast, ToastElement } = useToast();
 
   useEffect(() => {
     if (!user?.isDepartmentHead || currentRole !== 'department_head') {
@@ -19,7 +21,6 @@ export default function AddSubjectPage() {
   const [formData, setFormData] = useState({
     code: '',
     name: '',
-    academicYear: '2025/2026',
     semester: 1,
   });
 
@@ -31,7 +32,11 @@ export default function AddSubjectPage() {
       const response = await fetch('/api/subjects', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          ...formData,
+          academicYear: '2025/2026',
+          department: user?.department || 'Department of Computing & Information Systems',
+        }),
       });
 
       if (!response.ok) {
@@ -40,8 +45,8 @@ export default function AddSubjectPage() {
         return;
       }
 
-      alert('Subject added successfully!');
-      router.push('/dashboard');
+      showToast('Subject added successfully!', 'success');
+      setTimeout(() => router.push('/dashboard'), 1500);
     } catch (e: any) {
       setError(e.message || 'An error occurred. Please try again.');
     }
@@ -49,6 +54,7 @@ export default function AddSubjectPage() {
 
   return (
     <div className="p-8">
+      {ToastElement}
       <button
         onClick={() => router.push('/dashboard')}
         className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-6"
@@ -99,32 +105,16 @@ export default function AddSubjectPage() {
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Academic Year</label>
-              <select
-                value={formData.academicYear}
-                onChange={(e) => setFormData({ ...formData, academicYear: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
-                required
-              >
-                {['2022/2023','2023/2024','2024/2025','2025/2026','2026/2027','2027/2028','2028/2029','2029/2030'].map((year) => (
-                  <option key={year} value={year}>{year}</option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Semester</label>
-              <select
-                value={formData.semester}
-                onChange={(e) => setFormData({ ...formData, semester: Number(e.target.value) })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value={1}>Semester 1</option>
-                <option value={2}>Semester 2</option>
-              </select>
-            </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Semester</label>
+            <select
+              value={formData.semester}
+              onChange={(e) => setFormData({ ...formData, semester: Number(e.target.value) })}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+            >
+              <option value={1}>Semester 1</option>
+              <option value={2}>Semester 2</option>
+            </select>
           </div>
 
           <div className="flex gap-3 pt-4">

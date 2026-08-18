@@ -8,10 +8,11 @@ export async function PUT(
   try {
     const { id } = await params;
     const body = await request.json();
-    const { name, role, department, contact } = body;
+    const { name, email, role, department, contact } = body;
 
     const data: any = {};
     if (name !== undefined) data.name = name;
+    if (email !== undefined) data.email = email;
     if (role !== undefined) data.role = role;
     if (department !== undefined) data.department = department;
     if (contact !== undefined) data.contact = contact;

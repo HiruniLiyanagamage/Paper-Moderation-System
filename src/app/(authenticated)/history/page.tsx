@@ -2,6 +2,7 @@
 
 import { useState, useEffect, Fragment } from 'react';
 import { Download, ChevronDown, ChevronUp, FileText } from 'lucide-react';
+import { useAuth } from '@/lib/AuthContext';
 
 interface HistoryEntry {
   id: string;
@@ -15,6 +16,7 @@ interface HistoryEntry {
 }
 
 export default function HistoryPage() {
+  const { user } = useAuth();
   const [selectedYear, setSelectedYear] = useState('2025/2026');
   const [selectedSemester, setSelectedSemester] = useState('1');
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
@@ -23,8 +25,10 @@ export default function HistoryPage() {
 
   useEffect(() => {
     const fetchHistory = async () => {
+      if (!user) return;
       try {
-        const res = await fetch('/api/papers');
+        const dept = user.department || 'Department of Computing & Information Systems';
+        const res = await fetch(`/api/papers?department=${encodeURIComponent(dept)}`);
         if (res.ok) {
           const papers = await res.json();
           const finalizedPapers = papers.filter((p: any) => p.status === 'finalized');
@@ -49,7 +53,7 @@ export default function HistoryPage() {
       }
     };
     fetchHistory();
-  }, []);
+  }, [user]);
 
   const toggleRow = (id: string) => {
     const newExpanded = new Set(expandedRows);

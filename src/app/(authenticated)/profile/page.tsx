@@ -44,6 +44,12 @@ export default function ProfilePage() {
       return;
     }
 
+    const digitsOnly = contact.replace(/\D/g, '');
+    if (contact.trim() && digitsOnly.length !== 10) {
+      setProfileError('Contact number must be exactly 10 digits.');
+      return;
+    }
+
     await updateProfile({ name: name.trim(), contact: contact.trim() });
     setProfileMessage('Profile updated successfully.');
   };
@@ -55,6 +61,10 @@ export default function ProfilePage() {
 
     if (!currentPassword || !newPassword || !confirmPassword) {
       setPasswordError('Please fill all password fields.');
+      return;
+    }
+    if (newPassword.length < 6) {
+      setPasswordError('New password must be at least 6 characters.');
       return;
     }
     if (newPassword !== confirmPassword) {
@@ -121,18 +131,39 @@ export default function ProfilePage() {
                 />
               </div>
 
-              {/* Editable: Contact */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Contact number</label>
                 <div className="relative">
                   <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                   <input
                     value={contact}
-                    onChange={(e) => setContact(e.target.value)}
-                    className="w-full rounded-2xl border border-gray-300 pl-10 pr-4 py-3 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                    placeholder="e.g. 071-123-4567"
+                    onChange={(e) => {
+                      // Allow only digits and common separators (hyphens, spaces)
+                      const raw = e.target.value;
+                      // Strip everything except digits
+                      const digitsOnly = raw.replace(/\D/g, '');
+                      if (digitsOnly.length <= 10) {
+                        setContact(digitsOnly);
+                      }
+                    }}
+                    className={`w-full rounded-2xl border pl-10 pr-16 py-3 focus:ring-2 focus:ring-blue-100 ${
+                      contact.length > 0 && contact.replace(/\D/g, '').length !== 10
+                        ? 'border-red-400 focus:border-red-500'
+                        : 'border-gray-300 focus:border-blue-500'
+                    }`}
+                    placeholder="e.g. 0711234567"
+                    maxLength={10}
+                    inputMode="numeric"
                   />
+                  <span className={`absolute right-4 top-1/2 -translate-y-1/2 text-xs font-mono ${
+                    contact.length === 10 ? 'text-green-600' : 'text-gray-400'
+                  }`}>
+                    {contact.length}/10
+                  </span>
                 </div>
+                {contact.length > 0 && contact.replace(/\D/g, '').length !== 10 && (
+                  <p className="text-xs text-red-500 mt-1">Must be exactly 10 digits.</p>
+                )}
               </div>
 
               {/* Read-only: Email */}
@@ -190,9 +221,16 @@ export default function ProfilePage() {
                   type="password"
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
-                  className="w-full rounded-2xl border border-gray-300 px-4 py-3 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                  placeholder="Enter new password"
+                  className={`w-full rounded-2xl border px-4 py-3 focus:ring-2 focus:ring-blue-100 ${
+                    newPassword.length > 0 && newPassword.length < 6
+                      ? 'border-red-400 focus:border-red-500'
+                      : 'border-gray-300 focus:border-blue-500'
+                  }`}
+                  placeholder="At least 6 characters"
                 />
+                {newPassword.length > 0 && newPassword.length < 6 && (
+                  <p className="text-xs text-red-500 mt-1">Password must be at least 6 characters.</p>
+                )}
               </div>
 
               <div>

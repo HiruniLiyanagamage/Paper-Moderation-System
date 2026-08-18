@@ -51,6 +51,7 @@ model Subject {
   name          String
   academicYear  String
   semester      Int
+  department    String?
 
   lecturerId    String?
   lecturer      User? @relation("LecturerSubjects", fields: [lecturerId], references: [id])

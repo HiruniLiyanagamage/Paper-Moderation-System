@@ -8,6 +8,7 @@ import { LogIn } from 'lucide-react';
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [department, setDepartment] = useState('Department of Computing & Information Systems');
   const [error, setError] = useState('');
   const { login } = useAuth();
   const router = useRouter();
@@ -16,11 +17,11 @@ export default function LoginPage() {
     e.preventDefault();
     setError('');
 
-    const success = await login(email, password);
+    const success = await login(email, password, department);
     if (success) {
       router.push('/dashboard');
     } else {
-      setError('Invalid email or password');
+      setError('Invalid credentials or incorrect department selection.');
     }
   };
 
@@ -35,7 +36,22 @@ export default function LoginPage() {
           <p className="text-gray-600 mt-2">Wayamba University of Sri Lanka</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-5">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Department</label>
+            <select
+              value={department}
+              onChange={(e) => setDepartment(e.target.value)}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-950"
+              required
+            >
+              <option value="Department of Computing & Information Systems">Department of Computing & Information Systems</option>
+              <option value="Department of Electronics">Department of Electronics</option>
+              <option value="Department of Industrial Management">Department of Industrial Management</option>
+              <option value="Department of Mathematical Sciences">Department of Mathematical Sciences</option>
+            </select>
+          </div>
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
             <input
@@ -61,26 +77,42 @@ export default function LoginPage() {
           </div>
 
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
               {error}
             </div>
           )}
 
           <button
             type="submit"
-            className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium"
+            className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium cursor-pointer"
           >
             Sign In
           </button>
         </form>
 
-        <div className="mt-8 p-4 bg-gray-50 rounded-lg">
-          <p className="text-sm text-gray-600 font-medium mb-2">Demo Accounts:</p>
-          <div className="space-y-1 text-xs text-gray-500">
-            <p>• Department Head: head@example.com / password</p>
-            <p className="text-gray-400 ml-4">(All 3 roles: Head, Lecturer, Moderator)</p>
-            <p>• Lecturer: lecturer@example.com / password</p>
-            <p className="text-gray-400 ml-4">(2 roles: Lecturer, Moderator)</p>
+        <div className="mt-6 p-4 bg-gray-50 rounded-lg max-h-56 overflow-y-auto text-xs text-gray-500">
+          <p className="text-gray-700 font-semibold mb-2">Demo Accounts (Password: password):</p>
+          <div className="space-y-2">
+            <div>
+              <p className="font-medium text-gray-600">1. Computing &amp; Information Systems</p>
+              <p className="ml-2">• HOD: hod.cis@wayamba.lk</p>
+              <p className="ml-2">• Lecturer: lecturer.cis@wayamba.lk</p>
+            </div>
+            <div>
+              <p className="font-medium text-gray-600">2. Electronics</p>
+              <p className="ml-2">• HOD: hod.el@wayamba.lk</p>
+              <p className="ml-2">• Lecturer: lecturer.el@wayamba.lk</p>
+            </div>
+            <div>
+              <p className="font-medium text-gray-600">3. Industrial Management</p>
+              <p className="ml-2">• HOD: hod.im@wayamba.lk</p>
+              <p className="ml-2">• Lecturer: lecturer.im@wayamba.lk</p>
+            </div>
+            <div>
+              <p className="font-medium text-gray-600">4. Mathematical Sciences</p>
+              <p className="ml-2">• HOD: hod.ms@wayamba.lk</p>
+              <p className="ml-2">• Lecturer: lecturer.ms@wayamba.lk</p>
+            </div>
           </div>
         </div>
       </div>

@@ -58,7 +58,7 @@ export default function ModeratorDashboard() {
   }
 
   return (
-    <div className="p-8">
+    <div className="p-4 md:p-8">
       <div className="mb-6">
         <h1 className="text-3xl font-bold text-gray-900">Assigned Papers</h1>
         <p className="text-gray-600 mt-1">Review and moderate examination papers</p>
@@ -66,7 +66,7 @@ export default function ModeratorDashboard() {
 
       <RoleSwitcher />
 
-      <div className="bg-white rounded-lg shadow overflow-hidden">
+      <div className="bg-white rounded-lg shadow overflow-x-auto">
         <table className="w-full">
           <thead className="bg-gray-50">
             <tr>

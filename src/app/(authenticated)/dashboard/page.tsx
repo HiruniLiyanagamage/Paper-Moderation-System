@@ -152,7 +152,7 @@ export default function DepartmentHeadDashboard() {
   }
 
   return (
-    <div className="p-8">
+    <div className="p-4 md:p-8">
       {ToastElement}
       <div className="mb-6">
         <h1 className="text-3xl font-bold text-gray-900">Department Head Dashboard</h1>
@@ -173,7 +173,7 @@ export default function DepartmentHeadDashboard() {
           </button>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Current Academic Year</label>
             {isEditingAcademic ? (

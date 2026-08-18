@@ -158,7 +158,7 @@ export default function SubjectDetailsPage() {
   const isUnderModeration = existingPaperStatus === 'under_moderation';
 
   return (
-    <div className="p-8">
+    <div className="p-4 md:p-8">
       {ToastElement}
       <button
         onClick={handleCancel}
@@ -171,7 +171,7 @@ export default function SubjectDetailsPage() {
       {/* Subject info card */}
       <div className="bg-white rounded-lg shadow p-6 mb-6">
         <h1 className="text-2xl font-bold text-gray-900 mb-4">Upload Examination Paper</h1>
-        <div className="grid grid-cols-2 gap-4 text-sm">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
           <div>
             <span className="text-gray-600">Subject Code:</span>
             <span className="ml-2 font-medium">{subject.code}</span>

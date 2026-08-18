@@ -89,10 +89,10 @@ export default function ProfilePage() {
   };
 
   return (
-    <main className="p-8">
+    <main className="p-4 md:p-8">
       <div className="max-w-6xl mx-auto space-y-8">
         {/* Header card */}
-        <div className="bg-white rounded-3xl shadow p-8">
+        <div className="bg-white rounded-3xl shadow p-5 md:p-8">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
             <div className="flex items-center gap-4">
               <div className="h-16 w-16 rounded-3xl bg-blue-100 text-blue-700 flex items-center justify-center">
@@ -113,7 +113,7 @@ export default function ProfilePage() {
 
         <div className="grid gap-8 xl:grid-cols-[1.2fr_0.8fr]">
           {/* Account details - editable: name + contact only */}
-          <section className="bg-white rounded-3xl shadow p-8">
+          <section className="bg-white rounded-3xl shadow p-5 md:p-8">
             <div className="mb-6">
               <h2 className="text-2xl font-semibold text-gray-900">Account details</h2>
               <p className="text-sm text-gray-600 mt-2">Update your name and contact number.</p>
@@ -197,7 +197,7 @@ export default function ProfilePage() {
           </section>
 
           {/* Change password */}
-          <section className="bg-white rounded-3xl shadow p-8">
+          <section className="bg-white rounded-3xl shadow p-5 md:p-8">
             <div className="mb-6">
               <h2 className="text-2xl font-semibold text-gray-900">Change password</h2>
               <p className="text-sm text-gray-600 mt-2">Update your password securely.</p>

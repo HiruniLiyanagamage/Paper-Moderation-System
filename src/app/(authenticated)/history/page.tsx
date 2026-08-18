@@ -79,7 +79,7 @@ export default function HistoryPage() {
   }
 
   return (
-    <div className="p-8">
+    <div className="p-4 md:p-8">
       <div className="mb-6">
         <h1 className="text-3xl font-bold text-gray-900">Finalized Papers</h1>
         <p className="text-gray-600 mt-1">View all completed and locked examination papers and reports</p>
@@ -114,7 +114,7 @@ export default function HistoryPage() {
         </div>
       </div>
 
-      <div className="bg-white rounded-lg shadow overflow-hidden">
+      <div className="bg-white rounded-lg shadow overflow-x-auto">
         <table className="w-full border-collapse">
           <thead className="bg-gray-50">
             <tr>
@@ -152,11 +152,11 @@ export default function HistoryPage() {
                 </tr>
                 {expandedRows.has(entry.id) && (
                   <tr className="bg-gray-50">
-                    <td colSpan={5} className="px-12 py-4">
+                    <td colSpan={5} className="px-4 md:px-12 py-4">
                       <div className="space-y-4">
                         <div>
-                          <h3 className="font-semibold text-gray-900 mb-2">Finalized Version & Report</h3>
-                          <div className="flex gap-3">
+                          <h3 className="font-semibold text-gray-900 mb-2">Finalized Version &amp; Report</h3>
+                          <div className="flex flex-col sm:flex-row gap-3 flex-wrap">
                             {entry.finalPaper ? (
                               <a
                                 href={entry.finalPaper}

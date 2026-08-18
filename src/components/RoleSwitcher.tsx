@@ -56,20 +56,6 @@ export function RoleSwitcher() {
             ))}
           </div>
         </div>
-        <div className="text-sm text-gray-600">
-          <p className="font-medium">Your Roles:</p>
-          <div className="flex gap-2 mt-1">
-            {user.isDepartmentHead && (
-              <span className="px-2 py-1 bg-purple-100 text-purple-700 text-xs rounded">Head</span>
-            )}
-            {user.isLecturer && (
-              <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded">Lecturer</span>
-            )}
-            {user.isModerator && (
-              <span className="px-2 py-1 bg-green-100 text-green-700 text-xs rounded">Moderator</span>
-            )}
-          </div>
-        </div>
       </div>
     </div>
   );

@@ -5,6 +5,16 @@ import { useRouter, useParams } from 'next/navigation';
 import { ArrowLeft, Send, Eye, Download, Upload } from 'lucide-react';
 import { useAuth } from '@/lib/AuthContext';
 import { useToast } from '@/components/Toast';
+import { isAccessibleUrl } from '@/lib/fileUtils';
+
+/** Extracts the level from a subject code.
+ * e.g. "CMIS 4114" → 4, "ELTN 3223" → 3
+ * Looks for the first digit in the numeric portion of the code.
+ */
+function getLevelFromCode(subjectCode: string): number {
+  const match = subjectCode?.match(/\d/);
+  return match ? parseInt(match[0], 10) : 0;
+}
 
 export default function ModeratorFormPage() {
   const router = useRouter();
@@ -181,7 +191,7 @@ export default function ModeratorFormPage() {
             </div>
             <div>
               <span className="text-gray-600">Level & Semester:</span>
-              <p className="font-medium">Level 3 - Semester {paper.semester}</p>
+              <p className="font-medium">Level {getLevelFromCode(paper.subjectCode)} - Semester {paper.semester}</p>
             </div>
             <div>
               <span className="text-gray-600">Academic Year:</span>
@@ -189,7 +199,7 @@ export default function ModeratorFormPage() {
             </div>
             <div>
               <span className="text-gray-600">Department:</span>
-              <p className="font-medium">Department of Computing and Information Systems</p>
+              <p className="font-medium">{paper.department}</p>
             </div>
             <div>
               <span className="text-gray-600">Subject:</span>
@@ -205,8 +215,8 @@ export default function ModeratorFormPage() {
         {/* Real PDF View Section */}
         <div className="p-6 border-b border-gray-200 bg-blue-50">
           <h2 className="text-lg font-semibold text-blue-900 mb-3">Submitted Files for Review</h2>
-          <div className="flex gap-4">
-            {paper.paperUrl ? (
+          <div className="flex flex-col sm:flex-row gap-4 flex-wrap">
+            {isAccessibleUrl(paper.paperUrl) ? (
               <a
                 href={paper.paperUrl}
                 target="_blank"
@@ -217,10 +227,12 @@ export default function ModeratorFormPage() {
                 View Submitted Paper
               </a>
             ) : (
-              <span className="px-4 py-3 bg-gray-200 text-gray-500 rounded-lg font-medium">Paper not uploaded</span>
+              <span className="px-4 py-3 bg-amber-50 text-amber-700 border border-amber-200 rounded-lg font-medium">
+                {paper.paperUrl ? 'Paper unavailable (uploaded before deployment)' : 'Paper not uploaded'}
+              </span>
             )}
             
-            {paper.markingSchemeUrl ? (
+            {isAccessibleUrl(paper.markingSchemeUrl) ? (
               <a
                 href={paper.markingSchemeUrl}
                 target="_blank"
@@ -231,7 +243,9 @@ export default function ModeratorFormPage() {
                 View Submitted Marking Scheme
               </a>
             ) : (
-              <span className="px-4 py-3 bg-gray-200 text-gray-500 rounded-lg font-medium">Marking Scheme not uploaded</span>
+              <span className="px-4 py-3 bg-amber-50 text-amber-700 border border-amber-200 rounded-lg font-medium">
+                {paper.markingSchemeUrl ? 'Scheme unavailable (uploaded before deployment)' : 'Marking Scheme not uploaded'}
+              </span>
             )}
           </div>
         </div>

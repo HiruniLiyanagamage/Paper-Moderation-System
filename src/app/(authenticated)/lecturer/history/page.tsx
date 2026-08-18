@@ -3,6 +3,7 @@
 import { useState, useEffect, Fragment } from 'react';
 import { Download, ChevronDown, ChevronUp, FileText } from 'lucide-react';
 import { useAuth } from '@/lib/AuthContext';
+import { isAccessibleUrl } from '@/lib/fileUtils';
 
 interface HistoryEntry {
   id: string;
@@ -157,7 +158,7 @@ export default function LecturerHistoryPage() {
                         <div>
                           <h3 className="font-semibold text-gray-900 mb-2">Final Version</h3>
                           <div className="flex flex-col sm:flex-row gap-3 flex-wrap">
-                            {entry.finalPaper ? (
+                            {isAccessibleUrl(entry.finalPaper) ? (
                               <a
                                 href={entry.finalPaper}
                                 target="_blank"
@@ -168,9 +169,11 @@ export default function LecturerHistoryPage() {
                                 View Final Paper
                               </a>
                             ) : (
-                              <span className="text-sm text-gray-500 font-medium px-4 py-2 bg-gray-100 rounded-lg">Final paper not uploaded</span>
+                              <span className="text-sm font-medium px-4 py-2 bg-amber-50 text-amber-700 border border-amber-200 rounded-lg">
+                                {entry.finalPaper ? 'Final paper unavailable (legacy)' : 'Final paper not uploaded'}
+                              </span>
                             )}
-                            {entry.finalMarkingScheme ? (
+                            {isAccessibleUrl(entry.finalMarkingScheme) ? (
                               <a
                                 href={entry.finalMarkingScheme}
                                 target="_blank"
@@ -181,7 +184,9 @@ export default function LecturerHistoryPage() {
                                 View Final Marking Scheme
                               </a>
                             ) : (
-                              <span className="text-sm text-gray-500 font-medium px-4 py-2 bg-gray-100 rounded-lg">Final marking scheme not uploaded</span>
+                              <span className="text-sm font-medium px-4 py-2 bg-amber-50 text-amber-700 border border-amber-200 rounded-lg">
+                                {entry.finalMarkingScheme ? 'Scheme unavailable (legacy)' : 'Final marking scheme not uploaded'}
+                              </span>
                             )}
                           </div>
                         </div>

@@ -5,6 +5,7 @@ import { RoleSwitcher } from '@/components/RoleSwitcher';
 import Link from 'next/link';
 import { Eye, FileText } from 'lucide-react';
 import { useAuth } from '@/lib/AuthContext';
+import { isAccessibleUrl } from '@/lib/fileUtils';
 
 export default function ModeratorDashboard() {
   const { user } = useAuth();
@@ -101,25 +102,33 @@ export default function ModeratorDashboard() {
                 <td className="px-6 py-4 text-gray-600">{paper.academicYear}</td>
                 <td className="px-6 py-4 text-gray-600">Semester {paper.semester}</td>
                 <td className="px-6 py-4">
-                  <div className="flex gap-2">
-                    <a
-                      href={paper.paperUrl || '#'}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-1 px-3 py-1 bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition-colors text-sm"
-                    >
-                      <Eye className="w-4 h-4" />
-                      View Paper
-                    </a>
-                    <a
-                      href={paper.markingSchemeUrl || '#'}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-1 px-3 py-1 bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition-colors text-sm"
-                    >
-                      <Eye className="w-4 h-4" />
-                      View Scheme
-                    </a>
+                  <div className="flex gap-2 flex-wrap">
+                    {isAccessibleUrl(paper.paperUrl) ? (
+                      <a
+                        href={paper.paperUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-1 px-3 py-1 bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition-colors text-sm"
+                      >
+                        <Eye className="w-4 h-4" />
+                        View Paper
+                      </a>
+                    ) : (
+                      <span className="text-xs text-amber-600 bg-amber-50 border border-amber-200 px-3 py-1 rounded">Paper unavailable</span>
+                    )}
+                    {isAccessibleUrl(paper.markingSchemeUrl) ? (
+                      <a
+                        href={paper.markingSchemeUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-1 px-3 py-1 bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition-colors text-sm"
+                      >
+                        <Eye className="w-4 h-4" />
+                        View Scheme
+                      </a>
+                    ) : (
+                      <span className="text-xs text-amber-600 bg-amber-50 border border-amber-200 px-3 py-1 rounded">Scheme unavailable</span>
+                    )}
                     <Link
                       href={`/moderator/form/${paper.id}`}
                       className="flex items-center gap-1 px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors text-sm"

@@ -5,6 +5,7 @@ import { RoleSwitcher } from '@/components/RoleSwitcher';
 import Link from 'next/link';
 import { FileText, Clock, AlertCircle, CheckCircle, Circle, Eye } from 'lucide-react';
 import { useAuth } from '@/lib/AuthContext';
+import { isAccessibleUrl } from '@/lib/fileUtils';
 
 export default function LecturerDashboard() {
   const { user } = useAuth();
@@ -122,8 +123,8 @@ export default function LecturerDashboard() {
                 <td className="px-6 py-4">{getStatusBadge(paper.status)}</td>
                 <td className="px-6 py-4">
                   {paper.status === 'under_moderation' ? (
-                    <div className="flex items-center gap-2">
-                      {paper.paperUrl ? (
+                    <div className="flex items-center gap-2 flex-wrap">
+                      {isAccessibleUrl(paper.paperUrl) ? (
                         <a
                           href={paper.paperUrl}
                           target="_blank"
@@ -133,8 +134,10 @@ export default function LecturerDashboard() {
                           <Eye className="w-3.5 h-3.5" />
                           View Paper
                         </a>
+                      ) : paper.paperUrl ? (
+                        <span className="text-xs text-amber-600 bg-amber-50 border border-amber-200 px-3 py-1.5 rounded-lg">Paper unavailable (legacy)</span>
                       ) : null}
-                      {paper.markingSchemeUrl ? (
+                      {isAccessibleUrl(paper.markingSchemeUrl) ? (
                         <a
                           href={paper.markingSchemeUrl}
                           target="_blank"
@@ -144,6 +147,8 @@ export default function LecturerDashboard() {
                           <Eye className="w-3.5 h-3.5" />
                           View Scheme
                         </a>
+                      ) : paper.markingSchemeUrl ? (
+                        <span className="text-xs text-amber-600 bg-amber-50 border border-amber-200 px-3 py-1.5 rounded-lg">Scheme unavailable (legacy)</span>
                       ) : null}
                     </div>
                   ) : paper.status === 'revision_required' ? (
